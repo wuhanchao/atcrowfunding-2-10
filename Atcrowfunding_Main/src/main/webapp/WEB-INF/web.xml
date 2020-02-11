@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		 					 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+
+  <display-name>WenCrowdfunding</display-name>
+
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <!--
+    classpath*:*的作用
+    因为我们的项目有配置文件但是这个配置文件不光是我们这个项目中有
+    别的项目下也可能存在，将来别的项目是要打成jar包参与部署的
+    这个时候我们的这个web项目会去加载所有的配置文件包括其他jar包中的配置文件
+    所以要想将其他jar包中的配置文件也匹配到的话，必须要加上这个*
+    不加就只能扫描当前项目的配置文件
+    -->
+    <param-value>classpath*:spring/spring-*.xml</param-value>
+  </context-param>
+
+  <!-- 监听器:
+      创建spring框架的IOC容器
+      将IOC容器对象存放到application域
+      ApplicationContext ioc = WebApplicationContextUtils.getWebApplicationContext(application);
+
+      ServletContextListener监听器接口:
+          监听ServletContextListener创建和销毁.
+              如果监听到ServletContextListener创建(服务器启动),就会创建IOC容器(XmlWebApplicationContext).
+              如果监听到ServletContextListener销毁(服务器停止,或卸载项目),就会销毁IOC容器.
+  -->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+
+
+  <!-- 字符编码过滤器:
+      只负责解决POST请求乱码问题.如果发送的是get请求，将tomcat的编码改为utf-8
+   -->
+  <filter>
+    <filter-name>encoding</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forceEncoding</param-name>
+      <param-value>true</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>encoding</filter-name>
+    <url-pattern>/*</url-pattern>
+    <!--
+    <dispatcher>FORWARD</dispatcher>在请求转发的时候也要进行过滤
+    服务器内部的请求转发，不会过滤，因为默认情况下是REQUEST
+    <dispatcher>REQUEST</dispatcher>
+     -->
+  </filter-mapping>
+
+  <!-- 支持RESTful风格,将POST请求转换为PUT或DELETE请求.
+      会读取隐含参数 : "_method" -->
+  <filter>
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <!--规则相同的情况下，这个标记在前面先执行匹配，不同规则按照匹配规则的优先级配置-->
+    <filter-name>HiddenHttpMethodFilter</filter-name>
+    <servlet-name>springmvc</servlet-name>
+  </filter-mapping>
+
+
+
+  <servlet>
+    <servlet-name>springmvc</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:spring/springmvc-context.xml</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>springmvc</servlet-name>
+
+    <!-- 精确匹配
+    <url-pattern>/user/save</url-pattern>
+    -->
+    <!-- 路径匹配 -->
+    <!--
+    <url-pattern>/user/*</url-pattern>
+    <url-pattern>/*</url-pattern>
+     -->
+
+    <!-- 扩展匹配 -->
+
+    <url-pattern>*.htm</url-pattern>
+    <url-pattern>*.do</url-pattern>
+    <!-- 默认匹配
+
+<url-pattern>/</url-pattern>
+    -->
+  </servlet-mapping>
+
+  <!-- 会话超时时间 -->
+  <session-config>
+    <session-timeout>60</session-timeout>
+  </session-config>
+
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>
